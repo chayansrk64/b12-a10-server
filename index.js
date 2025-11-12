@@ -34,8 +34,9 @@ async function run() {
     await client.connect();
 
     const database = client.db('pawmart')
-    const usersCollection = database.collection('users')
+    const userCollection = database.collection('users')
     const listingCollection = database.collection('listings')
+    const orderCollection = database.collection('orders')
 
 
 
@@ -43,19 +44,24 @@ async function run() {
         const newUser = req.body;
         const email = req.body.email;
         const query = {email: email}
-        const existingUser = await usersCollection.findOne(query)
+        const existingUser = await userCollection.findOne(query)
 
         if(existingUser){
             res.status(409).send({message: "user already exists!"})
         }else {
-            const result = await usersCollection.insertOne(newUser)
+            const result = await userCollection.insertOne(newUser)
             res.send(result)
         }
 
     })
 
     app.get('/listings', async(req, res) => {
-        const cursor = listingCollection.find()
+        const email = req.query.email;
+        const query = {};
+        if(email){
+          query.email = email
+        }
+        const cursor = listingCollection.find(query)
         const result = await cursor.toArray()
         res.send(result)
     })
@@ -76,6 +82,12 @@ async function run() {
     app.get('/categories', async(req, res) => {
         const cursor = listingCollection.find()
         const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    app.post('/orders', async(req, res) => {
+        const order = req.body;
+        const result = await orderCollection.insertOne(order)
         res.send(result)
     })
 
