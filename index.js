@@ -32,15 +32,19 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
     const database = client.db('pawmart')
     const usersCollection = database.collection('users')
+    const listingCollection = database.collection('listings')
+
+
 
     app.post('/users', async(req, res) => {
         const newUser = req.body;
         const email = req.body.email;
         const query = {email: email}
         const existingUser = await usersCollection.findOne(query)
-        
+
         if(existingUser){
             res.status(409).send({message: "user already exists!"})
         }else {
@@ -48,6 +52,19 @@ async function run() {
             res.send(result)
         }
 
+    })
+
+    app.get('/listings', async(req, res) => {
+        const cursor = listingCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    app.get('/listings/:id', async(req, res) => {
+        const id = req.params.id;
+        const query = {_id: id}
+        const result = await listingCollection.findOne(query)
+        res.send(result)
     })
 
     // Send a ping to confirm a successful connection
