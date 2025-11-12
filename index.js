@@ -79,6 +79,19 @@ async function run() {
         res.send(result)
     })
 
+    app.patch('/listings/:id', async(req, res) => {
+        const id = req.params.id;
+        const updatedListing = req.body;
+        const query = {_id: new ObjectId(id)};
+        const update = {
+           $set: {
+              ...updatedListing
+           }
+        }
+        const result = await listingCollection.updateOne(query, update)
+        res.send(result)
+    })
+
     app.get('/categories', async(req, res) => {
         const cursor = listingCollection.find()
         const result = await cursor.toArray()
